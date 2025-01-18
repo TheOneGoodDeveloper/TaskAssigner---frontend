@@ -1,4 +1,5 @@
-import Instance from "../Instance";
+
+  import Instance from "../Instance";
 const API_URL = "/user";
 
 export const getAllEmployeeOwnerShip = async () => {

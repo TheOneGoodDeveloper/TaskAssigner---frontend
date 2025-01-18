@@ -1,4 +1,5 @@
-export const getpriority = (priority) => {
+
+  export const getpriority = (priority) => {
   switch (priority) {
     case "Critical":
       return "text-red-600 bg-red-50 rounded-md";

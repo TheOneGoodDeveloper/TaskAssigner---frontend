@@ -1,4 +1,5 @@
-// statusUtils.js
+
+  // statusUtils.js
 export const getStatus = (status) => {
   switch (status) {
     case "Not started":

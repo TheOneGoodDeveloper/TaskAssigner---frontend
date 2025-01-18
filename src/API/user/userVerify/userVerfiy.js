@@ -1,4 +1,5 @@
-import Instance from "@/API/Instance";
+
+  import Instance from "@/API/Instance";
 const API_URL = "/user";
 
 export const getEmpMails = async () => {
