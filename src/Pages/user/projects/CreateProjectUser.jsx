@@ -161,7 +161,7 @@ const CreateProjectUser = () => {
         Create New Project
       </Button>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="p-6 max-w-lg text-taskBlack bg-bg h-96 overflow-scroll">
+        <DialogContent className="p-6 max-w-lg text-taskBlack  h-96 overflow-scroll">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold">
               Create Project

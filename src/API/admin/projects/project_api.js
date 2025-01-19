@@ -25,7 +25,7 @@ export const fetchAllProjects = async (page, limit, searchTerm, status) => {
     // Construct the query parameters, including status and search term
     const statusQuery = status ? `&status=${status}` : "";
     const searchQuery = searchTerm ? `&search=${searchTerm}` : "";
-    console.log(page, limit, status);
+    // console.log(page, limit, status);
     // Make a GET request with query parameters, adding sort by createdAt in descending order
     const response = await Instance.post(
       `${API_URL}/getAllProjects/?page=${page}&limit=${limit}${statusQuery}${searchQuery}`
@@ -33,7 +33,7 @@ export const fetchAllProjects = async (page, limit, searchTerm, status) => {
 
     // Validate response
     if (response.data && response.data.data) {
-      console.log(response.data.data);
+      // console.log(response.data.data);
       return response.data.data; // Return the sorted project data
     } else {
       throw new Error("Invalid response structure");

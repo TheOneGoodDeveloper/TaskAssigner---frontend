@@ -15,6 +15,8 @@ import { getEmpMails } from "@/API/user/userVerify/userVerfiy";
 import Selector from "@/components/customUi/Selector";
 import Modal from "@/components/customUi/Modal";
 import { Combobox } from "@/components/customUi/Handle";
+import { FaPlus } from "react-icons/fa";
+import { VscLoading } from "react-icons/vsc";
 const CreateTaskUser = () => {
   const [formData, setFormData] = useState({
     project: null,
@@ -71,9 +73,9 @@ const CreateTaskUser = () => {
 
   const {
     data: userData,
-    isLoading,
-    isError,
-    error,
+    isLoading: isUserDataLoading,
+    isError: isUserDataError,
+    error: UserDataError,
   } = useQuery({
     queryKey: ["userData"],
     queryFn: getAllEmployeeOwnerShip,
@@ -150,11 +152,11 @@ const CreateTaskUser = () => {
   // console.log(userList);
   // console.log(ownershipOptions);
 
-  if (isLoading) {
+  if (isUserDataLoading) {
     return <div>Loading...</div>;
   }
-  if (isError) {
-    return <div>Error: {error.message}</div>;
+  if (isUserDataError) {
+    return <div>Error: {UserDataError.message}</div>;
   }
   // console.log(userList);
 
@@ -163,9 +165,7 @@ const CreateTaskUser = () => {
     return <div>Error fetching data: {UserListError.message}</div>;
   }
 
-  if (isProjectLoading) return <div>Loading...</div>;
-  if (isProjectError)
-    return <div>Error fetching data: {projectError.message}</div>;
+  // if (isProjectLoading) return <div>Loading...s</div>;
 
   const handleSelectChange = (name, value) => {
     setFormData((prevData) => ({
@@ -182,7 +182,7 @@ const CreateTaskUser = () => {
   return (
     <div>
       <Button onClick={() => setIsOpen(true)} className="w-fit">
-        Create Task
+        Create Task <FaPlus />
       </Button>
 
       {/* Main Form */}
@@ -215,20 +215,36 @@ const CreateTaskUser = () => {
               </p>
 
               {/* Step 1: Select Project */}
+
               {step === 1 && (
-                <Combobox
-                  items={projectlist} // Array of projects
-                  value={formData.project} // Controlled state
-                  onChange={(value) => {
-                    setFormData((prevData) => ({
-                      ...prevData,
-                      project: value, // Update the project value in the form data
-                    }));
-                    setStep(2); // Move to the next step
-                  }}
-                  placeholder="Select a project..."
-                />
+                <>
+                  {isProjectError ? (
+                    <>
+                      <p>UserData Fetch {projectError}</p>
+                    </>
+                  ) : isProjectLoading ? (
+                    <>
+                      <p className="animate-spin fixed">
+                        <VscLoading />
+                      </p>
+                    </>
+                  ) : (
+                    <Combobox
+                      items={projectlist} // Array of projects
+                      value={formData.project} // Controlled state
+                      onChange={(value) => {
+                        setFormData((prevData) => ({
+                          ...prevData,
+                          project: value, // Update the project value in the form data
+                        }));
+                        setStep(2); // Move to the next step
+                      }}
+                      placeholder="Select a project..."
+                    />
+                  )}
+                </>
               )}
+
               {step === 2 && (
                 <div className="flex flex-col gap-2">
                   {/* <Combobox
@@ -257,17 +273,31 @@ const CreateTaskUser = () => {
               {step === 3 && (
                 <div>
                   <div className="flex flex-col gap-4">
-                    <Combobox
-                      items={userList} // Array of projects
-                      value={formData.assigned_to} // Controlled state
-                      onChange={(value) => {
-                        setFormData((prevData) => ({
-                          ...prevData,
-                          assigned_to: value, // Update the project value in the form data
-                        }));
-                      }}
-                      placeholder="Assigned to"
-                    />
+                    {isUserDataError ? (
+                      <>
+                        <p>UserData Fetch Error</p>
+                      </>
+                    ) : (
+                      <>
+                        {isUserDataLoading ? (
+                          <>
+                            <p>Loading User Data...</p>
+                          </>
+                        ) : (
+                          <Combobox
+                            items={userList} // Array of projects
+                            value={formData.assigned_to} // Controlled state
+                            onChange={(value) => {
+                              setFormData((prevData) => ({
+                                ...prevData,
+                                assigned_to: value, // Update the project value in the form data
+                              }));
+                            }}
+                            placeholder="Assigned to"
+                          />
+                        )}
+                      </>
+                    )}
 
                     <Combobox
                       items={ownershipOptions} // Array of projects

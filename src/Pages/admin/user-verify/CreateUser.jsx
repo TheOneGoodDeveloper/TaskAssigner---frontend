@@ -9,13 +9,6 @@ import "react-toastify/dist/ReactToastify.css";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
   Select,
   SelectContent,
   SelectGroup,
@@ -24,6 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import Modal from "@/components/customUi/Modal";
+import { GrClose } from "react-icons/gr";
 
 const CreateUser = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -100,7 +95,7 @@ const CreateUser = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     // Basic validation
     if (formData.password !== formData.confirmPassword) {
       toast.error("Passwords do not match.");
@@ -114,7 +109,7 @@ const CreateUser = () => {
       toast.error("Invalid email address.");
       return;
     }
-    
+
     mutation.mutate(formData);
   };
 
@@ -129,162 +124,182 @@ const CreateUser = () => {
       <Button onClick={() => setIsOpen(true)} className="w-fit">
         Create User
       </Button>
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold ">
-              Create User
-            </DialogTitle>
-            <DialogDescription className="text-sm text-gray-500">
-              Fill in the details below to create a new User.
-            </DialogDescription>
-          </DialogHeader>
-          <form
-            onSubmit={handleSubmit}
-            className="flex flex-col space-y-4 h-[20rem] overflow-scroll"
+      <Modal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        title="Create User"
+      >
+        {isOpen && (
+          <div
+            className="fixed inset-0 z-50 flex justify-center items-center bg-black bg-opacity-40"
+            onClick={() => setIsOpen(false)}
           >
-            <Input
-              type="text"
-              name="name"
-              value={memoizedFormData.name}
-              onChange={handleChange}
-              placeholder="Name"
-              required
-            />
-            <Input
-              type="text"
-              name="phone"
-              value={memoizedFormData.phone}
-              onChange={handleChange}
-              placeholder="Phone"
-              required
-            />
-            <Input
-              type="email"
-              name="mail"
-              value={memoizedFormData.mail}
-              onChange={handleChange}
-              placeholder="Email"
-              required
-            />
-            <Input
-              type="password"
-              name="password"
-              value={memoizedFormData.password}
-              onChange={handleChange}
-              placeholder="Password"
-              required
-            />
-            <Input
-              type="password"
-              name="confirmPassword"
-              value={memoizedFormData.confirmPassword}
-              onChange={handleChange}
-              placeholder="Confirm Password"
-              required
-            />
-
-            <Select
-              onValueChange={(value) => handleDepartment(value)}
-              value={memoizedFormData.department}
-              required
-              className="outline-none focus:ring-0 focus:ring-offset-0"
-            >
-              <SelectTrigger className="outline-none focus:ring-0 focus:ring-offset-0 ">
-                <SelectValue placeholder="Select a department" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Departments</SelectLabel>
-                  <SelectItem value="design">Design</SelectItem>
-                  <SelectItem value="development">Development</SelectItem>
-                  <SelectItem value="marketing">Marketing</SelectItem>
-                  <SelectItem value="testing">Testing</SelectItem>
-                  <SelectItem value="human-resource">Human Resource</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-            <Select
-              onValueChange={(value) =>
-                setFormData({ ...formData, role: value })
-              }
-              value={memoizedFormData.role}
-              required
-            >
-              <SelectTrigger className="outline-none focus:ring-0 focus:ring-offset-0 ">
-                <SelectValue placeholder="Select a role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Roles</SelectLabel>
-                  <SelectItem value="member">Member</SelectItem>
-                  <SelectItem value="team lead">Team Leader</SelectItem>
-                  <SelectItem value="manager">Manager</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-
-            <Input
-              type="text"
-              name="employee_id"
-              value={memoizedFormData.employee_id}
-              readOnly
-              placeholder="Employee ID"
-            />
-            <Select
-              onValueChange={(value) =>
-                setFormData({ ...formData, admin_verify: value })
-              }
-              value={memoizedFormData.admin_verify}
-              required
-              className="outline-none focus:ring-0 focus:ring-offset-0"
-            >
-              <SelectTrigger className="outline-none focus:ring-0 focus:ring-offset-0 ">
-                <SelectValue placeholder="Verify User" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Admin Verify</SelectLabel>
-                  <SelectItem value="true">True</SelectItem>
-                  <SelectItem value="false">False</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-
             <div
-              className="flex items-center justify-between gap-6"
-              onClick={() => startDateRef.current.showPicker()}
+              className="bg-white p-8 rounded-lg shadow-lg w-96 max-h-[70%] overflow-auto"
+              onClick={(e) => e.stopPropagation()}
             >
-              <Input
-                ref={startDateRef}
-                type="date"
-                name="starting_date"
-                value={memoizedFormData.starting_date}
-                onChange={handleChange}
-                placeholder="Starting Date"
-                required
-              />
+              <div className="flex justify-between items-center mb-2">
+                <h2 className="text-2xl font-semibold">Create User</h2>
+                <GrClose
+                  onClick={() => setIsOpen(false)}
+                  className="cursor-pointer text-xl hover:text-red-600 transition-all"
+                />
+              </div>
+
+              <p className="text-sm text-gray-500 mb-6">
+                Fill in the details below to create a new User.
+              </p>
+
+              <form onSubmit={handleSubmit} className="space-y-4 flex flex-col">
+                <Input
+                  type="text"
+                  name="name"
+                  value={memoizedFormData.name}
+                  onChange={handleChange}
+                  placeholder="Name"
+                  required
+                  className="border-2 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+
+                <Input
+                  type="text"
+                  name="phone"
+                  value={memoizedFormData.phone}
+                  onChange={handleChange}
+                  placeholder="Phone"
+                  required
+                  className="border-2 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+
+                <Input
+                  type="email"
+                  name="mail"
+                  value={memoizedFormData.mail}
+                  onChange={handleChange}
+                  placeholder="Email"
+                  required
+                  className="border-2 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+
+                <Input
+                  type="password"
+                  name="password"
+                  value={memoizedFormData.password}
+                  onChange={handleChange}
+                  placeholder="Password"
+                  required
+                  className="border-2 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+
+                <Input
+                  type="password"
+                  name="confirmPassword"
+                  value={memoizedFormData.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Confirm Password"
+                  required
+                  className="border-2 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+
+                <Select
+                  onValueChange={(value) => handleDepartment(value)}
+                  value={memoizedFormData.department}
+                  required
+                  // className="focus:outline-none border-2 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500"
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Departments</SelectLabel>
+                      <SelectItem value="design">Design</SelectItem>
+                      <SelectItem value="development">Development</SelectItem>
+                      <SelectItem value="marketing">Marketing</SelectItem>
+                      <SelectItem value="testing">Testing</SelectItem>
+                      <SelectItem value="human-resource">
+                        Human Resource
+                      </SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+
+                <Select
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, role: value })
+                  }
+                  value={memoizedFormData.role}
+                  required
+                  className="focus:outline-none border-2 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500"
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Roles</SelectLabel>
+                      <SelectItem value="member">Member</SelectItem>
+                      <SelectItem value="team lead">Team Leader</SelectItem>
+                      <SelectItem value="manager">Manager</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+
+                <Input
+                  type="text"
+                  name="employee_id"
+                  value={memoizedFormData.employee_id}
+                  readOnly
+                  placeholder="Employee ID"
+                  className="border-2 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+
+                <Select
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, admin_verify: value })
+                  }
+                  value={memoizedFormData.admin_verify}
+                  required
+                  className="focus:outline-none border-2 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500"
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Verify User" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Admin Verify</SelectLabel>
+                      <SelectItem value="true">True</SelectItem>
+                      <SelectItem value="false">False</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+
+                <div className="flex items-center gap-4">
+                  <Input
+                    ref={startDateRef}
+                    type="date"
+                    name="starting_date"
+                    value={memoizedFormData.starting_date}
+                    onChange={handleChange}
+                    placeholder="Starting Date"
+                    required
+                    className="border-2 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+
+                <Button
+                  type="submit"
+                  className="bg-indigo-500 text-white px-6 py-2 rounded-lg hover:bg-indigo-600 transition-all"
+                >
+                  Create User
+                </Button>
+              </form>
             </div>
-            {/* <div
-              className="flex items-center justify-between gap-6"
-              onClick={() => endDateRef.current.showPicker()}
-            >
-              <Input
-                ref={endDateRef}
-                type="date"
-                name="lastWorking_date"
-                value={memoizedFormData.lastWorking_date}
-                onChange={handleChange}
-                placeholder="Last Working Date"
-              />
-            </div> */}
+          </div>
+        )}
+      </Modal>
 
-            <Button type="submit">Create User</Button>
-          </form>
-        </DialogContent>
-
-        <ToastContainer />
-      </Dialog>
+      <ToastContainer />
     </>
   );
 };

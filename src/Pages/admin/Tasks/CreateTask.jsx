@@ -2,7 +2,7 @@ import { getAllProjectList } from "@/API/admin/projects/project_api";
 import { Button } from "@/components/ui/button"; // Custom button component
 import { Input } from "@/components/ui/input"; // Custom input component
 import { Textarea } from "@/components/ui/textarea"; // Custom textarea component
-import { QueryClient, useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { Combobox } from "@/components/customUi/Handle";
 import { GrClose } from "react-icons/gr";
@@ -33,6 +33,7 @@ const CreateTask = () => {
   const startDateRef = useRef(null);
   const endDateRef = useRef(null);
 
+  const queryClient = useQueryClient();
   const [step, setStep] = useState(1); // Step 1: Project selection, Step 2: Task details
   const [isOpen, setIsOpen] = useState(false);
   const [ownershipOptions, setOwnershipOptions] = useState([]);
@@ -40,7 +41,6 @@ const CreateTask = () => {
   const [milestonesError, setMilestoneError] = useState("");
 
   // console.log(milestones);
-  const queryClient = new QueryClient();
 
   const priorityOptions = [
     { value: "Low", label: "Low" },

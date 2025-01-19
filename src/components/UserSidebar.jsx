@@ -44,7 +44,7 @@ const AdminSidebar = () => {
   // console.log(name);
 
   return (
-    <div className="flex w-full p-4 absolute h-full bg-slate-100">
+    <div className="flex w-full p-4 absolute h-screen bg-slate-100">
       <div
         className={`fixed rounded-xl flex flex-col h-[calc(100vh-3.5%)] overflow-y-scroll transition-all duration-300 z-50 ${
           isCollapsed ? "w-16" : "w-44 2xl:w-60"

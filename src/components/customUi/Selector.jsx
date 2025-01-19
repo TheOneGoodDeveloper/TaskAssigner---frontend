@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 
 const Selector = ({
   label,
+  name,
   id,
   value,
   onChange,
@@ -42,7 +43,7 @@ const Selector = ({
         whileFocus={{ scale: 1.02 }}
       >
         <option value="" disabled>
-          Select {label}
+          Select {name}
         </option>
         {options.map((option) => (
           <motion.option

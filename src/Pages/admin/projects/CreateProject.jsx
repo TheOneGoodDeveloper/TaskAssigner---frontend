@@ -1,12 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "../../../components/ui/dialog";
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
 import { Button } from "../../../components/ui/button";
@@ -15,16 +7,10 @@ import { toast, ToastContainer } from "react-toastify";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createProject } from "@/API/admin/projects/project_api";
 import { getAllEmployeeOwnerShip } from "@/API/admin/adminDashborad";
-import {
-  Select,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectGroup,
-  SelectLabel,
-} from "@/components/ui/select";
 import { PlusIcon } from "lucide-react";
+import Modal from "@/components/customUi/Modal";
+import { GrClose } from "react-icons/gr";
+import Selector from "@/components/customUi/Selector";
 
 const CreateProject = () => {
   const [formData, setFormData] = useState({
@@ -47,6 +33,7 @@ const CreateProject = () => {
 
   const startDateRef = useRef(null);
   const endDateRef = useRef(null);
+  const inputRef = useRef(null);
 
   const mutations = useMutation({
     mutationFn: createProject,
@@ -62,8 +49,9 @@ const CreateProject = () => {
         estimated_hours: "",
         milestones: [], // Reset milestones in formData
       });
-      setIsOpen(false);
+      setMilestones([]);
       toast.success("Project Created Successfully");
+      setIsOpen(false);
     },
     onError: (err) => {
       if (err.response) {
@@ -99,7 +87,7 @@ const CreateProject = () => {
   } = useQuery({
     queryKey: ["userData"],
     queryFn: getAllEmployeeOwnerShip,
-    enabled: isOpen, // Only fetch when the dialog is open
+    enabled: true, // Always fetch
   });
 
   // console.log(formData);
@@ -129,15 +117,6 @@ const CreateProject = () => {
     return <div>Error: {error.message}</div>;
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (formData.milestones.length === 0) {
-      toast.error("Please add at least one milestone.");
-      return;
-    }
-    mutations.mutate(formData);
-  };
-
   const handleSelectChange = (name, value) => {
     setFormData((prevData) => ({
       ...prevData,
@@ -147,190 +126,221 @@ const CreateProject = () => {
 
   const handleAddMilestone = () => {
     if (newMilestone.trim() !== "") {
-      setMilestones([...milestones, newMilestone]);
+      setMilestones([...milestones, newMilestone]); // Add the milestone to the list
       setFormData((prevData) => ({
         ...prevData,
-        milestones: [...prevData.milestones, newMilestone],
+        milestones: [...prevData.milestones, newMilestone], // Update formData with the new milestone
       }));
-      setNewMilestone("");
-      setShowMilestoneInput(false);
+      setNewMilestone(""); // Clear the input field
+      setShowMilestoneInput(false); // Temporarily hide the input field
+
+      setTimeout(() => {
+        setShowMilestoneInput(true); // Re-show the input field after the state update
+        inputRef.current?.focus(); // Focus the input field
+      }, 0); // Use a short delay to ensure the state updates before re-rendering
     }
+  };
+
+  const handleSubmit = async (e) => {
+    // console.log(formData);
+
+    e.preventDefault();
+    if (formData.milestones.length === 0) {
+      toast.error("Please add at least one milestone.");
+      return;
+    }
+    mutations.mutate(formData);
   };
 
   return (
     <>
       <Button onClick={() => setIsOpen(true)} className="w-fit">
-        Create New Project
+        Create Project
       </Button>
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="p-6 max-w-lg text-taskBlack bg-bg h-96 overflow-scroll">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold">
-              Create Project
-            </DialogTitle>
-            <DialogDescription className="text-sm text-gray-500">
-              Fill in the details below to create a new Project.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Project Details</h3>
-              <div>
-                <Input
-                  id="project_name"
-                  name="project_name"
-                  value={formData.project_name}
-                  onChange={(e) =>
-                    handleSelectChange("project_name", e.target.value)
-                  }
-                  required
-                  placeholder="Enter project title"
+      <Modal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        title="Create Project"
+      >
+        {isOpen && (
+          <div
+            className="fixed inset-0 m-auto overflow-y-scroll z-50 bg-opacity-50 flex justify-center items-center overflow-scroll"
+            onClick={() => setIsOpen(false)}
+          >
+            <div
+              className="bg-white p-6 rounded-lg shadow-lg w-96 h-1/2 overflow-y-scroll"
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            >
+              <div className="text-xl font-bold inline-flex justify-between items-center w-full">
+                Create Project{" "}
+                <GrClose
+                  onClick={() => setIsOpen(false)}
+                  className="cursor-pointer hover:text-red-500 transition-all"
                 />
-              </div>
-              <div>
-                <Textarea
-                  id="project_description"
-                  name="project_description"
-                  value={formData.project_description}
-                  onChange={(e) =>
-                    handleSelectChange("project_description", e.target.value)
-                  }
-                  required
-                  placeholder="Enter project description"
-                  className="outline-none border-none focus:ring-0 focus:ring-offset-0 "
-                />
-              </div>
-            </div>
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Ownership</h3>
-              <div>
-                <Select
-                  id="project_ownership"
-                  name="project_ownership"
-                  value={formData.project_ownership}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, project_ownership: value })
-                  }
-                  required
-                  className="w-full p-2 border rounded-md"
-                >
-                  <SelectTrigger className="outline-none focus:ring-0 focus:ring-offset-0 ">
-                    <SelectValue placeholder="Select project ownership" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Select a Ownership</SelectLabel>
-                      {ownershipOptions.map((option) => (
-                        <SelectItem key={option.id} value={option.id}>
-                          {option.name}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold">MileStone</h3>
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={() => setShowMilestoneInput(true)}
-                  className="p-2"
-                >
-                  <PlusIcon className="h-5 w-5" />
-                </Button>
-                {showMilestoneInput && (
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="text"
-                      value={newMilestone}
-                      onChange={(e) => setNewMilestone(e.target.value)}
-                      placeholder="Enter milestone"
-                      className="w-full"
-                    />
-                    <Button onClick={handleAddMilestone} className="p-2">
-                      Add
-                    </Button>
-                  </div>
-                )}
-              </div>
-              <ul className="mt-2">
-                {milestones.map((milestone, index) => (
-                  <li key={index} className="list-disc ml-4">
-                    {milestone}
-                  </li>
-                ))}
-              </ul>
-              {formData.milestones.length === 0 && (
-                <p className="text-red-500 text-sm">
-                  At least one milestone is required.
-                </p>
-              )}
-            </div>
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Dates</h3>
-              <div className="flex items-center justify-between gap-6">
-                <div className="w-full cursor-pointer">
-                  <Label htmlFor="start_date">Start Date</Label>
-                  <Input
-                    onClick={() => startDateRef.current.showPicker()}
-                    ref={startDateRef}
-                    id="start_date"
-                    name="start_date"
-                    type="date"
-                    value={formData.start_date}
-                    onChange={(e) =>
-                      handleSelectChange("start_date", e.target.value)
-                    }
-                    required
-                  />
-                </div>
-                <div className="w-full cursor-pointer">
-                  <Label htmlFor="end_date">End Date</Label>
-                  <Input
-                    onClick={() => endDateRef.current.showPicker()}
-                    ref={endDateRef}
-                    id="end_date"
-                    name="end_date"
-                    type="date"
-                    value={formData.end_date}
-                    onChange={(e) =>
-                      handleSelectChange("end_date", e.target.value)
-                    }
-                    required
-                  />
-                </div>
               </div>
 
-              <div>
-                <Label htmlFor="estimated_hours">Estimated Hour</Label>
-                <Input
-                  id="estimated_hours"
-                  name="estimated_hours"
-                  type="number"
-                  value={formData.estimated_hours}
-                  onChange={(e) =>
-                    handleSelectChange(
-                      "estimated_hours",
-                      Number(e.target.value)
-                    )
-                  }
-                  required
-                />
+              <div className="text-sm text-gray-500">
+                Fill in the details below to create a new Project.
               </div>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Project Details</h3>
+                  <div>
+                    <Input
+                      id="project_name"
+                      name="project_name"
+                      value={formData.project_name}
+                      onChange={(e) =>
+                        handleSelectChange("project_name", e.target.value)
+                      }
+                      required
+                      placeholder="Enter project title"
+                    />
+                  </div>
+                  <div>
+                    <Textarea
+                      id="project_description"
+                      name="project_description"
+                      value={formData.project_description}
+                      onChange={(e) =>
+                        handleSelectChange(
+                          "project_description",
+                          e.target.value
+                        )
+                      }
+                      required
+                      placeholder="Enter project description"
+                      className="outline-none focus:ring-0 focus:ring-offset-0 "
+                    />
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Ownership</h3>
+                  <div>
+                    <Selector
+                      // label="Ownership"
+                      id="project_ownership"
+                      name="project_ownership"
+                      value={formData.project_ownership}
+                      onChange={(e) =>
+                        handleSelectChange("project_ownership", e.target.value)
+                      }
+                      required={true}
+                      options={ownershipOptions.map((ownershipOption) => ({
+                        value: ownershipOption.id,
+                        label: ownershipOption.name,
+                      }))}
+                      className="w-full p-2 border rounded-md"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold">MileStone</h3>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      onClick={() => {
+                        setShowMilestoneInput(true); // Show the input field
+                        setTimeout(() => inputRef.current?.focus(), 0); // Set focus after re-render
+                      }}
+                      className="p-2"
+                    >
+                      <PlusIcon className="h-5 w-5" />
+                    </Button>
+                    {showMilestoneInput && (
+                      <div className="flex items-center gap-2">
+                        <Input
+                          ref={inputRef}
+                          type="text"
+                          value={newMilestone}
+                          onChange={(e) => setNewMilestone(e.target.value)}
+                          placeholder="Enter milestone"
+                          className="w-full"
+                        />
+                        <Button onClick={handleAddMilestone} className="p-2">
+                          Add
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                  <ul className="mt-2">
+                    {milestones.map((milestone, index) => (
+                      <li key={index} className="list-disc ml-4">
+                        {milestone}
+                      </li>
+                    ))}
+                  </ul>
+                  {/* {formData.milestones.length === 0 && (
+                    <p className="text-red-500 text-sm">
+                      At least one milestone is required.
+                    </p>
+                  )} */}
+                </div>
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Dates</h3>
+                  <div className="flex items-center justify-between gap-6">
+                    <div className="w-full cursor-pointer">
+                      <Label htmlFor="start_date">Start Date</Label>
+                      <Input
+                        onClick={() => startDateRef.current.showPicker()}
+                        ref={startDateRef}
+                        id="start_date"
+                        name="start_date"
+                        type="date"
+                        value={formData.start_date}
+                        onChange={(e) =>
+                          handleSelectChange("start_date", e.target.value)
+                        }
+                        required
+                      />
+                    </div>
+                    <div className="w-full cursor-pointer">
+                      <Label htmlFor="end_date">End Date</Label>
+                      <Input
+                        onClick={() => endDateRef.current.showPicker()}
+                        ref={endDateRef}
+                        id="end_date"
+                        name="end_date"
+                        type="date"
+                        value={formData.end_date}
+                        onChange={(e) =>
+                          handleSelectChange("end_date", e.target.value)
+                        }
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="estimated_hours">Estimated Hour</Label>
+                    <Input
+                      id="estimated_hours"
+                      name="estimated_hours"
+                      type="number"
+                      value={formData.estimated_hours}
+                      onChange={(e) =>
+                        handleSelectChange(
+                          "estimated_hours",
+                          Number(e.target.value)
+                        )
+                      }
+                      required
+                    />
+                  </div>
+                </div>
+                <Button
+                  type="submit"
+                  className="mt-4 w-full"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Creating..." : "Create Project"}
+                </Button>
+              </form>
             </div>
-            <DialogFooter>
-              <Button
-                type="submit"
-                className="mt-4 w-full"
-                disabled={isLoading}
-              >
-                {isLoading ? "Creating..." : "Create Project"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+          </div>
+        )}
+      </Modal>
       <ToastContainer />
     </>
   );

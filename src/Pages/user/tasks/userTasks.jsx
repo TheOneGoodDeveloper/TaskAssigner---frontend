@@ -85,9 +85,9 @@ const UserTasks = () => {
 
   const columns = [
     { key: "task_title", title: "Task Title" },
+    { key: "project_name", title: "Project", className: "text-center" },
     { key: "assigned_by", title: "Assigned By", className: "text-center" },
     { key: "assigned_to", title: "Assigned To", className: "text-center" },
-    { key: "project_name", title: "Project", className: "text-center" },
     { key: "start_date", title: "Start Date", className: "text-center" },
     { key: "end_date", title: "End Date", className: "text-center" },
     { key: "status", title: "Status", className: "text-center" },
@@ -113,13 +113,13 @@ const UserTasks = () => {
         </div>
       </td>
       <td className="px-2 py-3 text-sm text-center">
+        {task.project?.project_name || "N/A"} {/* Access nested field */}
+      </td>
+      <td className="px-2 py-3 text-sm text-center">
         {task.assigned_by?.name || "N/A"} {/* Access nested field */}
       </td>
       <td className="px-2 py-3 text-sm text-center">
         {task.assigned_to?.name || "N/A"} {/* Access nested field */}
-      </td>
-      <td className="px-2 py-3 text-sm text-center">
-        {task.project?.project_name || "N/A"} {/* Access nested field */}
       </td>
 
       <td className="px-2 py-3 text-sm text-center">
